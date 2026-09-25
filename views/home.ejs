@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TuneVault Web</title>
+</head>
+<body>
+  <h1>🎵 TuneVault</h1>
+  <p>Browse the song catalog below.</p>
+
+  <ul>
+    <% songs.forEach(function(song) { %>
+      <li>
+        <a href="/song/<%= song.id %>">
+          <%= song.title %> — <%= song.artist %>
+        </a>
+        (<%= song.genre %>, <%= song.duration %>)
+      </li>
+    <% }); %>
+  </ul>
+</body>
+</html>

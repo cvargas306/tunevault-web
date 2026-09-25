@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add a Song — TuneVault Web</title>
+</head>
+<body>
+  <a href="/">&larr; Back to catalog</a>
+
+  <h1>Add a Song</h1>
+
+  <form action="/add" method="POST">
+    <label for="title">Title:</label><br />
+    <input type="text" id="title" name="title" required /><br /><br />
+
+    <label for="artist">Artist:</label><br />
+    <input type="text" id="artist" name="artist" required /><br /><br />
+
+    <label for="duration">Duration (e.g. 3:45):</label><br />
+    <input type="text" id="duration" name="duration" required /><br /><br />
+
+    <label for="genre">Genre:</label><br />
+    <input type="text" id="genre" name="genre" required /><br /><br />
+
+    <button type="submit">Add Song</button>
+  </form>
+</body>
+</html>

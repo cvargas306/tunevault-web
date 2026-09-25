@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "title": "Bohemian Rhapsody",
+    "artist": "Queen",
+    "album": "A Night at the Opera",
+    "duration": "5:55",
+    "genre": "Rock"
+  },
+  {
+    "id": 2,
+    "title": "Billie Jean",
+    "artist": "Michael Jackson",
+    "album": "Thriller",
+    "duration": "4:54",
+    "genre": "Pop"
+  },
+  {
+    "id": 3,
+    "title": "Clocks",
+    "artist": "Coldplay",
+    "album": "A Rush of Blood to the Head",
+    "duration": "5:07",
+    "genre": "Alternative Rock"
+  },
+  {
+    "id": 4,
+    "title": "So What",
+    "artist": "Miles Davis",
+    "album": "Kind of Blue",
+    "duration": "9:22",
+    "genre": "Jazz"
+  },
+  {
+    "id": 5,
+    "title": "Clair de Lune",
+    "artist": "Claude Debussy",
+    "album": "Suite Bergamasque",
+    "duration": "4:35",
+    "genre": "Classical"
+  },
+  {
+    "id": 6,
+    "title": "One More Time",
+    "artist": "Daft Punk",
+    "album": "Discovery",
+    "duration": "5:20",
+    "genre": "Electronic"
+  },
+  {
+    "id": 7,
+    "title": "No Woman, No Cry",
+    "artist": "Bob Marley & The Wailers",
+    "album": "Natty Dread",
+    "duration": "4:06",
+    "genre": "Reggae"
+  },
+  {
+    "id": 8,
+    "title": "Hotel California",
+    "artist": "Eagles",
+    "album": "Hotel California",
+    "duration": "6:30",
+    "genre": "Rock"
+  },
+  {
+    "id": 9,
+    "title": "Take Five",
+    "artist": "Dave Brubeck",
+    "album": "Time Out",
+    "duration": "5:24",
+    "genre": "Jazz"
+  },
+  {
+    "id": 10,
+    "title": "Someone Like You",
+    "artist": "Adele",
+    "album": "21",
+    "duration": "4:45",
+    "genre": "Pop"
+  }
+]
