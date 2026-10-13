@@ -10,18 +10,27 @@
 
   <h1>Add a Song</h1>
 
-  <form action="/add" method="POST">
+    <form action="/add" method="POST">
     <label for="title">Title:</label><br />
     <input type="text" id="title" name="title" required /><br /><br />
 
     <label for="artist">Artist:</label><br />
     <input type="text" id="artist" name="artist" required /><br /><br />
 
-    <label for="duration">Duration (e.g. 3:45):</label><br />
-    <input type="text" id="duration" name="duration" required /><br /><br />
+    <label for="album">Album (optional):</label><br />
+    <input type="text" id="album" name="album" /><br /><br />
 
-    <label for="genre">Genre:</label><br />
-    <input type="text" id="genre" name="genre" required /><br /><br />
+    <label for="duration">Duration (e.g. 3:45):</label><br />
+    <input type="text" id="duration" name="duration" required
+           pattern="[0-9]+:[0-5][0-9]" title="Use m:ss, for example 3:45" /><br /><br />
+
+    <label for="genre_id">Genre:</label><br />
+    <select id="genre_id" name="genre_id" required>
+      <option value="">-- Choose a genre --</option>
+      <% genres.forEach(function (genre) { %>
+        <option value="<%= genre.id %>"><%= genre.name %></option>
+      <% }); %>
+    </select><br /><br />
 
     <button type="submit">Add Song</button>
   </form>

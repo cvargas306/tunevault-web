@@ -5,9 +5,6 @@ const PORT = 3000;
 // Shared PostgreSQL connection pool (see db.js)
 const pool = require("./db");
 
-// Load the songs data from the JSON file
-const songs = require("./data/songs.json");
-
 app.set("view engine", "ejs");
 app.set("views", "./views");
 
@@ -21,6 +18,18 @@ function formatDuration(totalSeconds) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+// Convert "m:ss" text (e.g. "5:55") into total seconds (e.g. 355).
+// Returns null when the text does not match the m:ss format.
+function parseDuration(text) {
+  const match = /^(\d+):([0-5]\d)$/.exec(text.trim());
+  if (!match) {
+    return null;
+  }
+  const minutes = parseInt(match[1], 10);
+  const seconds = parseInt(match[2], 10);
+  return minutes * 60 + seconds;
 }
 
 // Route to display the details of a specific song by ID.
@@ -76,31 +85,54 @@ app.get("/song/:id", (req, res) => {
   res.render("detail", { song: song });
 });
 
-// Route to display the form for adding a new song
-app.get("/add", (req, res) => {
-  res.render("add");
+// Route to display the form for adding a new song.
+// Loads the genres from the database to fill the genre dropdown.
+app.get("/add", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT id, name FROM genres ORDER BY name");
+    res.render("add", { genres: result.rows });
+  } catch (err) {
+    console.error("Error loading genres:", err.message);
+    res.status(500).send("Error loading genres from the database");
+  }
 });
 
-// Route to handle the submission of the new song form
-app.post("/add", (req, res) => {
-  const maxId = songs.reduce(function (max, s) {
-    return s.id > max ? s.id : max;
-  }, 0);
+// Route to handle the submission of the new song form.
+// Validates the duration, then builds a parameterized INSERT and
+// redirects to the new song's detail page using the id PostgreSQL returns.
+app.post("/add", async (req, res) => {
+  const durationSeconds = parseDuration(req.body.duration);
 
-  // Create a new song object with the submitted data
-  const newSong = {
-    id: maxId + 1,
-    title: req.body.title,
-    artist: req.body.artist,
-    album: "Single",
-    duration: req.body.duration,
-    genre: req.body.genre,
-  };
+  // Stop here if the duration is not in m:ss format
+  if (durationSeconds === null) {
+    res.status(400).send("Invalid duration. Use m:ss, for example 3:45.");
+    return;
+  }
 
-  songs.push(newSong);
-  
-  // Redirect to the home page after adding the new song
-  res.redirect("/");
+  // An empty album field is saved as NULL (for singles)
+  const album = req.body.album.trim() || null;
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO songs (title, artist, album, duration_seconds, genre_id)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id`,
+      [
+        req.body.title.trim(),
+        req.body.artist.trim(),
+        album,
+        durationSeconds,
+        parseInt(req.body.genre_id, 10),
+      ]
+    );
+
+    // RETURNING id gives back the id PostgreSQL generated for the new song
+    const newId = result.rows[0].id;
+    res.redirect(`/song/${newId}`);
+  } catch (err) {
+    console.error("Error adding song:", err.message);
+    res.status(500).send("Error saving the song to the database");
+  }
 });
 
 app.listen(PORT, () => {
