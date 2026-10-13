@@ -23,27 +23,40 @@ function formatDuration(totalSeconds) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
-// Route to display the list of songs on the home page.
-// Builds a SELECT query with a JOIN, sends it to PostgreSQL,
-// and renders the rows it returns.
-app.get("/", async (req, res) => {
+// Route to display the details of a specific song by ID.
+// Uses a parameterized SELECT ($1) so the id from the URL is sent safely.
+app.get("/song/:id", async (req, res) => {
+  const songId = parseInt(req.params.id, 10);
+
+  // Reject ids that are not numbers before querying the database
+  if (Number.isNaN(songId)) {
+    res.status(404).send("Song not found");
+    return;
+  }
+
   try {
-    const result = await pool.query(`
-      SELECT s.id, s.title, s.artist, s.album, s.duration_seconds, g.name AS genre
-      FROM songs s
-      JOIN genres g ON s.genre_id = g.id
-      ORDER BY s.id
-    `);
+    const result = await pool.query(
+      `SELECT s.id, s.title, s.artist, s.album, s.duration_seconds, g.name AS genre
+       FROM songs s
+       JOIN genres g ON s.genre_id = g.id
+       WHERE s.id = $1`,
+      [songId]
+    );
 
-    // Add a formatted "duration" field so the template can keep using song.duration
-    const songsFromDb = result.rows.map(function (row) {
-      return { ...row, duration: formatDuration(row.duration_seconds) };
-    });
+    // No row means there is no song with that id
+    if (result.rows.length === 0) {
+      res.status(404).send("Song not found");
+      return;
+    }
 
-    res.render("home", { songs: songsFromDb });
+    // Add the formatted duration so detail.ejs can keep using song.duration
+    const row = result.rows[0];
+    const song = { ...row, duration: formatDuration(row.duration_seconds) };
+
+    res.render("detail", { song: song });
   } catch (err) {
-    console.error("Error loading songs:", err.message);
-    res.status(500).send("Error loading songs from the database");
+    console.error("Error loading song:", err.message);
+    res.status(500).send("Error loading the song from the database");
   }
 });
 
