@@ -32,6 +32,30 @@ function parseDuration(text) {
   return minutes * 60 + seconds;
 }
 
+// Route to display the list of songs on the home page.
+// Builds a SELECT query with a JOIN, sends it to PostgreSQL,
+// and renders the rows it returns.
+app.get("/", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT s.id, s.title, s.artist, s.album, s.duration_seconds, g.name AS genre
+      FROM songs s
+      JOIN genres g ON s.genre_id = g.id
+      ORDER BY s.id
+    `);
+
+    // Add a formatted "duration" field so the template can keep using song.duration
+    const songsFromDb = result.rows.map(function (row) {
+      return { ...row, duration: formatDuration(row.duration_seconds) };
+    });
+
+    res.render("home", { songs: songsFromDb });
+  } catch (err) {
+    console.error("Error loading songs:", err.message);
+    res.status(500).send("Error loading songs from the database");
+  }
+});
+
 // Route to display the details of a specific song by ID.
 // Uses a parameterized SELECT ($1) so the id from the URL is sent safely.
 app.get("/song/:id", async (req, res) => {
@@ -67,22 +91,6 @@ app.get("/song/:id", async (req, res) => {
     console.error("Error loading song:", err.message);
     res.status(500).send("Error loading the song from the database");
   }
-});
-
-// Route to display the details of a specific song by ID
-app.get("/song/:id", (req, res) => {
-  const songId = parseInt(req.params.id, 10);
-
-  const song = songs.find(function (s) {
-    return s.id === songId;
-  });
-
-  if (!song) {
-    res.status(404).send("Song not found");
-    return;
-  }
-
-  res.render("detail", { song: song });
 });
 
 // Route to display the form for adding a new song.
