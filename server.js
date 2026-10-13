@@ -143,6 +143,92 @@ app.post("/add", async (req, res) => {
   }
 });
 
+// Route to display the edit form for an existing song.
+// Loads the song and the list of genres so the form can be pre-filled.
+app.get("/song/:id/edit", async (req, res) => {
+  const songId = parseInt(req.params.id, 10);
+
+  // Reject ids that are not numbers before querying the database
+  if (Number.isNaN(songId)) {
+    res.status(404).send("Song not found");
+    return;
+  }
+
+  try {
+    const songResult = await pool.query(
+      `SELECT id, title, artist, album, duration_seconds, genre_id
+       FROM songs
+       WHERE id = $1`,
+      [songId]
+    );
+
+    if (songResult.rows.length === 0) {
+      res.status(404).send("Song not found");
+      return;
+    }
+
+    const genresResult = await pool.query("SELECT id, name FROM genres ORDER BY name");
+
+    // Show the duration as m:ss in the form instead of seconds
+    const row = songResult.rows[0];
+    const song = { ...row, duration: formatDuration(row.duration_seconds) };
+
+    res.render("edit", { song: song, genres: genresResult.rows });
+  } catch (err) {
+    console.error("Error loading song for editing:", err.message);
+    res.status(500).send("Error loading the song from the database");
+  }
+});
+
+// Route to handle the submission of the edit form.
+// Validates the duration, then builds a parameterized UPDATE
+// and redirects back to the song's detail page.
+app.post("/song/:id/edit", async (req, res) => {
+  const songId = parseInt(req.params.id, 10);
+  const durationSeconds = parseDuration(req.body.duration);
+
+  if (Number.isNaN(songId)) {
+    res.status(404).send("Song not found");
+    return;
+  }
+
+  // Stop here if the duration is not in m:ss format
+  if (durationSeconds === null) {
+    res.status(400).send("Invalid duration. Use m:ss, for example 3:45.");
+    return;
+  }
+
+  // An empty album field is saved as NULL (for singles)
+  const album = req.body.album.trim() || null;
+
+  try {
+    const result = await pool.query(
+      `UPDATE songs
+       SET title = $1, artist = $2, album = $3, duration_seconds = $4, genre_id = $5
+       WHERE id = $6`,
+      [
+        req.body.title.trim(),
+        req.body.artist.trim(),
+        album,
+        durationSeconds,
+        parseInt(req.body.genre_id, 10),
+        songId,
+      ]
+    );
+
+    // rowCount tells how many rows were updated; 0 means the id did not exist
+    if (result.rowCount === 0) {
+      res.status(404).send("Song not found");
+      return;
+    }
+
+    res.redirect(`/song/${songId}`);
+  } catch (err) {
+    console.error("Error updating song:", err.message);
+    res.status(500).send("Error updating the song in the database");
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server listening at http://localhost:${PORT}`);
 });
