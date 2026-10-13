@@ -14,5 +14,9 @@
   <p><strong>Genre:</strong> <%= song.genre %></p>
   <p><strong>Duration:</strong> <%= song.duration %></p>
   <p><a href="/song/<%= song.id %>/edit">Edit this song</a></p>
+    <form action="/song/<%= song.id %>/delete" method="POST"
+        onsubmit="return confirm('Delete this song? This cannot be undone.');">
+    <button type="submit">Delete this song</button>
+  </form>
 </body>
 </html>

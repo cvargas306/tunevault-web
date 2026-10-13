@@ -229,6 +229,33 @@ app.post("/song/:id/edit", async (req, res) => {
   }
 });
 
+// Route to delete a song.
+// Builds a parameterized DELETE and redirects to the home page.
+app.post("/song/:id/delete", async (req, res) => {
+  const songId = parseInt(req.params.id, 10);
+
+  // Reject ids that are not numbers before querying the database
+  if (Number.isNaN(songId)) {
+    res.status(404).send("Song not found");
+    return;
+  }
+
+  try {
+    const result = await pool.query("DELETE FROM songs WHERE id = $1", [songId]);
+
+    // rowCount tells how many rows were deleted; 0 means the id did not exist
+    if (result.rowCount === 0) {
+      res.status(404).send("Song not found");
+      return;
+    }
+
+    res.redirect("/");
+  } catch (err) {
+    console.error("Error deleting song:", err.message);
+    res.status(500).send("Error deleting the song from the database");
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server listening at http://localhost:${PORT}`);
 });
