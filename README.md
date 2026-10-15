@@ -16,7 +16,9 @@ To run it locally:
 
 My purpose in building this software was to learn how a web application communicates with a relational database: designing tables and relationships, writing SQL from the terminal, and running parameterized queries from Node.js to insert, retrieve, update, and delete data safely.
 
-[Software Demo Video](http://youtube.link.goes.here)
+[Software Demo Video -Part 1](https://www.loom.com/share/c42cef78083c4cd596fd42501519702f)
+
+[Software Demo Video -Part 2](https://www.loom.com/share/0c30c3f5e8ac428eb743c6d09159e9e5)
 
 # Relational Database
 
